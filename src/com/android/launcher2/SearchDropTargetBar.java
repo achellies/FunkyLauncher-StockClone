@@ -29,7 +29,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
-import com.android.launcher.R;
+import com.funkyandroid.launcher.R;
 
 /*
  * Ths bar will manage the transition between the QSB search bar and the delete drop

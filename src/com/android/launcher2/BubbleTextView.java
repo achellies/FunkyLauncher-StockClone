@@ -30,7 +30,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
-import com.android.launcher.R;
+import com.funkyandroid.launcher.R;
 
 /**
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan

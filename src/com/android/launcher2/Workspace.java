@@ -64,7 +64,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.launcher.R;
+import com.funkyandroid.launcher.R;
 import com.android.launcher2.FolderIcon.FolderRingAnimator;
 import com.android.launcher2.InstallWidgetReceiver.WidgetMimeTypeHandlerData;
 

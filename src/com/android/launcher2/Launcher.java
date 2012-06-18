@@ -93,7 +93,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.common.Search;
-import com.android.launcher.R;
+import com.funkyandroid.launcher.R;
 import com.android.launcher2.DropTarget.DragObject;
 
 import java.io.DataInputStream;

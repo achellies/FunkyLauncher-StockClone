@@ -26,7 +26,7 @@ import android.widget.Toast;
 
 import java.net.URISyntaxException;
 
-import com.android.launcher.R;
+import com.funkyandroid.launcher.R;
 
 public class UninstallShortcutReceiver extends BroadcastReceiver {
     private static final String ACTION_UNINSTALL_SHORTCUT =

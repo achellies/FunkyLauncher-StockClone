@@ -30,7 +30,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.inputmethod.InputMethodManager;
 
-import com.android.launcher.R;
+import com.funkyandroid.launcher.R;
 
 import java.util.ArrayList;
 

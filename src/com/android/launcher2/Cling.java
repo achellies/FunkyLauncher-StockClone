@@ -30,7 +30,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.widget.FrameLayout;
 
-import com.android.launcher.R;
+import com.funkyandroid.launcher.R;
 
 public class Cling extends FrameLayout {
 

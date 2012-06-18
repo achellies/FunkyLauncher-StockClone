@@ -25,7 +25,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.android.launcher.R;
+import com.funkyandroid.launcher.R;
 
 public class Hotseat extends FrameLayout {
     private static final String TAG = "Hotseat";

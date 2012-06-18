@@ -46,7 +46,7 @@ import android.widget.Checkable;
 import android.widget.ImageView;
 import android.widget.Scroller;
 
-import com.android.launcher.R;
+import com.funkyandroid.launcher.R;
 
 import java.util.ArrayList;
 

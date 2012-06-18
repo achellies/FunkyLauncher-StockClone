@@ -34,7 +34,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.launcher.R;
+import com.funkyandroid.launcher.R;
 
 /**
  * The linear layout used strictly for the widget/wallpaper tab of the customization tray

@@ -48,7 +48,7 @@ import android.util.Log;
 import android.util.Xml;
 
 import com.android.internal.util.XmlUtils;
-import com.android.launcher.R;
+import com.funkyandroid.launcher.R;
 import com.android.launcher2.LauncherSettings.Favorites;
 
 import org.xmlpull.v1.XmlPullParser;

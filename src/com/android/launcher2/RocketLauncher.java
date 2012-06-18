@@ -39,7 +39,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.android.launcher.R;
+import com.funkyandroid.launcher.R;
 
 import java.util.HashMap;
 import java.util.Random;
