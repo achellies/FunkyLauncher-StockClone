@@ -24,10 +24,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
+
+import com.funkyandroid.launcher2.rulesengine.WifiChangeHandlerService;
 
 public class LauncherApplication extends Application {
     /**
@@ -86,6 +89,13 @@ public class LauncherApplication extends Application {
         ContentResolver resolver = getContentResolver();
         resolver.registerContentObserver(LauncherSettings.Favorites.CONTENT_URI, true,
                 mFavoritesObserver);
+        
+        WifiManager wifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
+        WifiChangeHandlerService.changeWallpaper(
+        		this, 
+        		wifiManager.isWifiEnabled() 
+        		&& wifiManager.getConnectionInfo() != null);
+        
     }
 
     /**
