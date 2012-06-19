@@ -68,6 +68,8 @@ import com.funkyandroid.launcher.R;
 import com.android.launcher2.FolderIcon.FolderRingAnimator;
 import com.android.launcher2.InstallWidgetReceiver.WidgetMimeTypeHandlerData;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -238,6 +240,35 @@ public class Workspace extends SmoothPagedView
     private float mTransitionProgress;
 
     /**
+     * Used to access ViewGroup method hidden by the SDK.
+     */
+    private static Method sViewGroupChildLayersEnabled;
+    static {
+    	Class<?>[] methodParams = { Boolean.class };
+    	try {
+    		sViewGroupChildLayersEnabled = ViewGroup.class.getDeclaredMethod("setChildrenLayersEnabled", methodParams );
+    	} catch(NoSuchMethodException e) {
+    		Log.e("Funky Launcher", "Unable to find childLayersEnabled set method", e);
+    		sViewGroupChildLayersEnabled = null;
+    	}
+    }
+    private static final Object[] sChildEnablerEnabledParams = { Boolean.TRUE };
+    private static final Object[] sChildEnablerDisbledParams = { Boolean.FALSE };
+
+    /**
+     * Used to access ClipData method hidden by the SDK
+     */
+    private static Method sClipDataGetIcon;
+    static {
+    	try {
+			sClipDataGetIcon = ClipData.class.getDeclaredMethod("getIcon", (Class<?>[]) null);
+		} catch (NoSuchMethodException e) {
+			Log.e(Workspace.TAG, "Unable to get getIcon method for ClipData");
+		}
+    }
+    
+    
+    /**
      * Used to inflate the Workspace from XML.
      *
      * @param context The application's context.
@@ -342,7 +373,7 @@ public class Workspace extends SmoothPagedView
         cl.cellToRect(hCell, vCell, hSpan, vSpan, r);
         if (pendingInfo instanceof PendingAddWidgetInfo) {
             PendingAddWidgetInfo widgetInfo = (PendingAddWidgetInfo) pendingInfo;
-            Rect p = AppWidgetHostView.getDefaultPaddingForWidget(mContext,
+            Rect p = AppWidgetHostView.getDefaultPaddingForWidget(getContext(),
                     widgetInfo.componentName, null);
             r.top += p.top;
             r.left += p.left;
@@ -762,7 +793,14 @@ public class Workspace extends SmoothPagedView
 
     protected void setWallpaperDimension() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        mLauncher.getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
+        try {
+        	Method m = Display.class.getMethod("getRealMetrics", DisplayMetrics.class);
+        	Object[] methodParams = { displayMetrics };
+        	m.invoke(mLauncher.getWindowManager().getDefaultDisplay(), methodParams );
+        } catch(Exception ex) {
+        	Log.e("Funky Launcher", "Error fetching display metrics", ex);
+        }
+                
         final int maxDim = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
         final int minDim = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels);
 
@@ -815,7 +853,7 @@ public class Workspace extends SmoothPagedView
         int scrollRange = getScrollRange();
 
         // Again, we adjust the wallpaper offset to be consistent between values of mLayoutScale
-        float adjustedScrollX = Math.max(0, Math.min(mScrollX, mMaxScrollX));
+        float adjustedScrollX = Math.max(0, Math.min(getScrollX(), mMaxScrollX));
         adjustedScrollX *= mWallpaperScrollRatio;
         mLayoutScale = layoutScale;
 
@@ -855,7 +893,7 @@ public class Workspace extends SmoothPagedView
             }
         }
         if (keepUpdating) {
-            fastInvalidate();
+            invalidate();
         }
     }
 
@@ -1167,13 +1205,13 @@ public class Workspace extends SmoothPagedView
                                 backgroundAlphaInterpolator(Math.abs(scrollProgress)));
                     }
                 }
-                cl.setFastTranslationX(translationX);
-                cl.setFastRotationY(rotation);
+                cl.setTranslationX(translationX);
+                cl.setRotationY(rotation);
                 if (mFadeInAdjacentScreens && !isSmall()) {
                     float alpha = 1 - Math.abs(scrollProgress);
                     cl.setFastAlpha(alpha);
                 }
-                cl.fastInvalidate();
+                cl.invalidate();
             }
         }
         if (!isSwitchingState() && !isInOverscroll) {
@@ -1269,7 +1307,7 @@ public class Workspace extends SmoothPagedView
         if (mBackground != null && mBackgroundAlpha > 0.0f && mDrawBackground) {
             int alpha = (int) (mBackgroundAlpha * 255);
             mBackground.setAlpha(alpha);
-            mBackground.setBounds(mScrollX, 0, mScrollX + getMeasuredWidth(),
+            mBackground.setBounds(getScrollX(), 0, getScrollX() + getMeasuredWidth(),
                     getMeasuredHeight());
             mBackground.draw(canvas);
         }
@@ -1299,8 +1337,12 @@ public class Workspace extends SmoothPagedView
                 for (int i = leftScreen; i <= rightScreen; i++) {
                     ViewGroup page = (ViewGroup) getPageAt(i);
                     if (page.getVisibility() == VISIBLE &&
-                            page.getAlpha() > ViewConfiguration.ALPHA_THRESHOLD) {
-                        ((ViewGroup)getPageAt(i)).setChildrenLayersEnabled(true);
+                        page.getAlpha() > LauncherApplication.getAlphaThreshold()) {
+                    	try {
+							sViewGroupChildLayersEnabled.invoke(getPageAt(i), sChildEnablerEnabledParams);
+						} catch (Exception e) {
+							Log.e("Funky Launcher", "Problem setting layers enabled for children", e);
+						}
                     }
                 }
             }
@@ -1317,21 +1359,21 @@ public class Workspace extends SmoothPagedView
             final int pageHeight = getChildAt(0).getHeight();
 
             // Set the height of the outline to be the height of the page
-            final int offset = (height - pageHeight - mPaddingTop - mPaddingBottom) / 2;
-            final int paddingTop = mPaddingTop + offset;
-            final int paddingBottom = mPaddingBottom + offset;
+            final int offset = (height - pageHeight - getPaddingTop() - getPaddingBottom()) / 2;
+            final int paddingTop = getPaddingTop() + offset;
+            final int paddingBottom = getPaddingBottom() + offset;
 
             final CellLayout leftPage = (CellLayout) getChildAt(mCurrentPage - 1);
             final CellLayout rightPage = (CellLayout) getChildAt(mCurrentPage + 1);
 
             if (leftPage != null && leftPage.getIsDragOverlapping()) {
                 final Drawable d = getResources().getDrawable(R.drawable.page_hover_left_holo);
-                d.setBounds(mScrollX, paddingTop, mScrollX + d.getIntrinsicWidth(),
+                d.setBounds(getScrollX(), paddingTop, getScrollX() + d.getIntrinsicWidth(),
                         height - paddingBottom);
                 d.draw(canvas);
             } else if (rightPage != null && rightPage.getIsDragOverlapping()) {
                 final Drawable d = getResources().getDrawable(R.drawable.page_hover_right_holo);
-                d.setBounds(mScrollX + width - d.getIntrinsicWidth(), paddingTop, mScrollX + width,
+                d.setBounds(getScrollX() + width - d.getIntrinsicWidth(), paddingTop, getScrollX() + width,
                         height - paddingBottom);
                 d.draw(canvas);
             }
@@ -1418,7 +1460,11 @@ public class Workspace extends SmoothPagedView
             // the enabling to dispatchDraw
             if (!enableChildrenLayers) {
                 for (int i = 0; i < getPageCount(); i++) {
-                    ((ViewGroup)getChildAt(i)).setChildrenLayersEnabled(false);
+                	try {
+						sViewGroupChildLayersEnabled.invoke(getPageAt(i), sChildEnablerDisbledParams);
+					} catch (Exception e) {
+						Log.e("Funky Launcher", "Problem setting layers disabled for children", e);
+					}
                 }
             }
         }
@@ -1725,10 +1771,10 @@ public class Workspace extends SmoothPagedView
                     for (int i = 0; i < getChildCount(); i++) {
                         final CellLayout cl = (CellLayout) getChildAt(i);
                         cl.invalidate();
-                        cl.setFastTranslationX(a * mOldTranslationXs[i] + b * mNewTranslationXs[i]);
-                        cl.setFastTranslationY(a * mOldTranslationYs[i] + b * mNewTranslationYs[i]);
-                        cl.setFastScaleX(a * mOldScaleXs[i] + b * mNewScaleXs[i]);
-                        cl.setFastScaleY(a * mOldScaleYs[i] + b * mNewScaleYs[i]);
+                        cl.setTranslationX(a * mOldTranslationXs[i] + b * mNewTranslationXs[i]);
+                        cl.setTranslationY(a * mOldTranslationYs[i] + b * mNewTranslationYs[i]);
+                        cl.setScaleX(a * mOldScaleXs[i] + b * mNewScaleXs[i]);
+                        cl.setScaleY(a * mOldScaleYs[i] + b * mNewScaleYs[i]);
                         cl.setFastBackgroundAlpha(
                                 a * mOldBackgroundAlphas[i] + b * mNewBackgroundAlphas[i]);
                         cl.setBackgroundAlphaMultiplier(a * mOldBackgroundAlphaMultipliers[i] +
@@ -1751,7 +1797,7 @@ public class Workspace extends SmoothPagedView
                     }
                     for (int i = 0; i < getChildCount(); i++) {
                         final CellLayout cl = (CellLayout) getChildAt(i);
-                        cl.setFastRotationY(a * mOldRotationYs[i] + b * mNewRotationYs[i]);
+                        cl.setRotationY(a * mOldRotationYs[i] + b * mNewRotationYs[i]);
                     }
                 }
             });
@@ -2396,7 +2442,7 @@ public class Workspace extends SmoothPagedView
                 return new Pair<Integer, List<WidgetMimeTypeHandlerData>>(i, null);
             } else {
                 final List<WidgetMimeTypeHandlerData> widgets =
-                    model.resolveWidgetsForMimeType(mContext, mimeType);
+                    model.resolveWidgetsForMimeType(getContext(), mimeType);
                 if (widgets.size() > 0) {
                     return new Pair<Integer, List<WidgetMimeTypeHandlerData>>(i, widgets);
                 }
@@ -2433,7 +2479,7 @@ public class Workspace extends SmoothPagedView
                 }
             } else {
                 // Show error message if we couldn't accept any of the items
-                Toast.makeText(mContext, mContext.getString(R.string.external_drop_widget_error),
+                Toast.makeText(getContext(), getContext().getString(R.string.external_drop_widget_error),
                         Toast.LENGTH_SHORT).show();
                 return false;
             }
@@ -2474,9 +2520,14 @@ public class Workspace extends SmoothPagedView
                 final String mimeType = desc.getMimeType(index);
                 if (isShortcut) {
                     final Intent intent = data.getItemAt(index).getIntent();
-                    Object info = model.infoFromShortcutIntent(mContext, intent, data.getIcon());
-                    if (info != null) {
-                        onDropExternal(new int[] { x, y }, info, layout, false);
+                    try {
+                    	Bitmap icon = (Bitmap) sClipDataGetIcon.invoke(data, (Object[])null);        
+	                    Object info = model.infoFromShortcutIntent(getContext(), intent, icon);
+	                    if (info != null) {
+	                        onDropExternal(new int[] { x, y }, info, layout, false);
+	                    }
+                    } catch ( Exception e ) {
+                    	Log.e(Workspace.TAG, "Problem getting drag icon", e);
                     }
                 } else {
                     if (widgets.size() == 1) {
@@ -2494,10 +2545,10 @@ public class Workspace extends SmoothPagedView
                             new InstallWidgetReceiver.WidgetListAdapter(mLauncher, mimeType,
                                     data, widgets, layout, mCurrentPage, pos);
                         final AlertDialog.Builder builder =
-                            new AlertDialog.Builder(mContext);
+                            new AlertDialog.Builder(getContext());
                         builder.setAdapter(adapter, adapter);
                         builder.setCancelable(true);
-                        builder.setTitle(mContext.getString(
+                        builder.setTitle(getContext().getString(
                                 R.string.external_drop_widget_pick_title));
                         builder.setIcon(R.drawable.ic_no_applications);
                         builder.show();
@@ -2540,8 +2591,8 @@ public class Workspace extends SmoothPagedView
            v.getMatrix().invert(mTempInverseMatrix);
            cachedInverseMatrix = mTempInverseMatrix;
        }
-       xy[0] = xy[0] + mScrollX - v.getLeft();
-       xy[1] = xy[1] + mScrollY - v.getTop();
+       xy[0] = xy[0] + getScrollX() - v.getLeft();
+       xy[1] = xy[1] + getScrollY() - v.getTop();
        cachedInverseMatrix.mapPoints(xy);
    }
 
@@ -2562,8 +2613,8 @@ public class Workspace extends SmoothPagedView
     */
    void mapPointFromChildToSelf(View v, float[] xy) {
        v.getMatrix().mapPoints(xy);
-       xy[0] -= (mScrollX - v.getLeft());
-       xy[1] -= (mScrollY - v.getTop());
+       xy[0] -= (getScrollX() - v.getLeft());
+       xy[1] -= (getScrollY() - v.getTop());
    }
 
    static private float squaredDistance(float[] point1, float[] point2) {
@@ -3508,7 +3559,7 @@ public class Workspace extends SmoothPagedView
     @Override
     protected String getCurrentPageDescription() {
         int page = (mNextPage != INVALID_PAGE) ? mNextPage : mCurrentPage;
-        return String.format(mContext.getString(R.string.workspace_scroll_format),
+        return String.format(getContext().getString(R.string.workspace_scroll_format),
                 page + 1, getChildCount());
     }
 

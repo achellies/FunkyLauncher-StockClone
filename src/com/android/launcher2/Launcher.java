@@ -60,7 +60,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.text.Selection;
@@ -94,6 +93,7 @@ import android.widget.Toast;
 
 import com.android.common.Search;
 import com.funkyandroid.launcher.R;
+import com.funkyandroid.launcher2.utils.SearchManagerUtils;
 import com.android.launcher2.DropTarget.DragObject;
 
 import java.io.DataInputStream;
@@ -102,6 +102,7 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -111,7 +112,7 @@ import java.util.HashMap;
 public final class Launcher extends Activity
         implements View.OnClickListener, OnLongClickListener, LauncherModel.Callbacks,
                    AllAppsView.Watcher, View.OnTouchListener {
-    static final String TAG = "Launcher";
+    public static final String TAG = "Funky Launcher";
     static final boolean LOGD = false;
 
     static final boolean PROFILE_STARTUP = false;
@@ -1289,7 +1290,12 @@ public final class Launcher extends Activity
         mWorkspace = null;
         mDragController = null;
 
-        ValueAnimator.clearAllAnimations();
+        try {
+	        Method clearMethod = ValueAnimator.class.getMethod("clearAllAnimations", (Class<?>[]) null);
+	        clearMethod.invoke(null, (Object[])null);
+        } catch(Exception ex) {
+        	Log.e("Funky Launcher", "Error trying to fast-clear animations", ex);
+        }
     }
 
     public DragController getDragController() {
@@ -1324,7 +1330,7 @@ public final class Launcher extends Activity
 
         final SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchManager.startSearch(initialQuery, selectInitialQuery, getComponentName(),
+        SearchManagerUtils.startSearch(searchManager, initialQuery, selectInitialQuery, getComponentName(),
             appSearchData, globalSearch, sourceBounds);
     }
 
@@ -1596,10 +1602,6 @@ public final class Launcher extends Activity
                 case KeyEvent.KEYCODE_HOME:
                     return true;
                 case KeyEvent.KEYCODE_VOLUME_DOWN:
-                    if (SystemProperties.getInt("debug.launcher2.dumpstate", 0) != 0) {
-                        dumpState();
-                        return true;
-                    }
                     break;
             }
         } else if (event.getAction() == KeyEvent.ACTION_UP) {
@@ -2682,7 +2684,7 @@ public final class Launcher extends Activity
 
         final SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        ComponentName activityName = searchManager.getGlobalSearchActivity();
+        ComponentName activityName = SearchManagerUtils.getGlobalSearchActivity(searchManager);
         if (activityName != null) {
             int coi = getCurrentOrientationIndexForGlobalIcons();
             sGlobalSearchIcon[coi] = updateButtonWithIconFromExternalActivity(

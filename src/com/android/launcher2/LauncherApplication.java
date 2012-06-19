@@ -25,14 +25,25 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.util.Log;
 
 import java.lang.ref.WeakReference;
 
 public class LauncherApplication extends Application {
+    /**
+     * Intent action to be broadcast to inform that the global search provider
+     * has changed. Normal components will have no need to handle this intent since
+     * they should be using API methods from this class to access the global search
+     * activity
+     */
+    public final static String INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED = "android.search.action.GLOBAL_SEARCH_ACTIVITY_CHANGED";
+	
+	
     public LauncherModel mModel;
     public IconCache mIconCache;
     private static boolean sIsScreenLarge;
     private static float sScreenDensity;
+    private static float sAlphaThreshold;
     WeakReference<LauncherProvider> mLauncherProvider;
 
     @Override
@@ -46,6 +57,9 @@ public class LauncherApplication extends Application {
             screenSize == Configuration.SCREENLAYOUT_SIZE_XLARGE;
         sScreenDensity = getResources().getDisplayMetrics().density;
 
+        sAlphaThreshold = 0.5f / 24;
+        Log.i("FunkyLauncher", "IsLarge : "+sIsScreenLarge+" - density "+sScreenDensity+" X "+getResources().getConfiguration());
+        
         mIconCache = new IconCache(this);
         mModel = new LauncherModel(this, mIconCache);
 
@@ -62,7 +76,7 @@ public class LauncherApplication extends Application {
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         registerReceiver(mModel, filter);
         filter = new IntentFilter();
-        filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
+        filter.addAction(LauncherApplication.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
         registerReceiver(mModel, filter);
         filter = new IntentFilter();
         filter.addAction(SearchManager.INTENT_ACTION_SEARCHABLES_CHANGED);
@@ -129,5 +143,9 @@ public class LauncherApplication extends Application {
 
     public static float getScreenDensity() {
         return sScreenDensity;
+    }
+    
+    public static float getAlphaThreshold() {
+    	return sAlphaThreshold;
     }
 }

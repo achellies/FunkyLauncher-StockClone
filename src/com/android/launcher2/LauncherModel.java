@@ -636,7 +636,7 @@ public class LauncherModel extends BroadcastReceiver {
              }
              // Update previousConfig
              mPreviousConfigMcc = currentConfig.mcc;
-        } else if (SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED.equals(action) ||
+        } else if (LauncherApplication.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED.equals(action) ||
                    SearchManager.INTENT_ACTION_SEARCHABLES_CHANGED.equals(action)) {
             if (mCallbacks != null) {
                 Callbacks callbacks = mCallbacks.get();

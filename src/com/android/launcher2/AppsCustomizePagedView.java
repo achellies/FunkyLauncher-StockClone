@@ -1371,7 +1371,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
                 // If the view has 0 alpha, we set it to be invisible so as to prevent
                 // it from accepting touches
-                if (alpha < ViewConfiguration.ALPHA_THRESHOLD) {
+                if (alpha < LauncherApplication.getAlphaThreshold()) {
                     v.setVisibility(INVISIBLE);
                 } else if (v.getVisibility() != VISIBLE) {
                     v.setVisibility(VISIBLE);
@@ -1576,6 +1576,6 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
             count = mNumWidgetPages;
         }
 
-        return String.format(mContext.getString(stringId), page + 1, count);
+        return String.format(getContext().getString(stringId), page + 1, count);
     }
 }

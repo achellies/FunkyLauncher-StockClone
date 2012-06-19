@@ -49,6 +49,7 @@ import android.util.Xml;
 
 import com.android.internal.util.XmlUtils;
 import com.funkyandroid.launcher.R;
+import com.funkyandroid.launcher2.utils.SearchManagerUtils;
 import com.android.launcher2.LauncherSettings.Favorites;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -67,7 +68,7 @@ public class LauncherProvider extends ContentProvider {
 
     private static final int DATABASE_VERSION = 9;
 
-    static final String AUTHORITY = "com.android.launcher2.settings";
+    static final String AUTHORITY = "com.funkyandroid.launcher2.settings";
 
     static final String TABLE_FAVORITES = "favorites";
     static final String PARAMETER_NOTIFY = "notify";
@@ -885,7 +886,7 @@ public class LauncherProvider extends ContentProvider {
         private ComponentName getSearchWidgetProvider() {
             SearchManager searchManager =
                     (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
-            ComponentName searchComponent = searchManager.getGlobalSearchActivity();
+            ComponentName searchComponent = SearchManagerUtils.getGlobalSearchActivity(searchManager);
             if (searchComponent == null) return null;
             return getProviderInPackage(searchComponent.getPackageName());
         }

@@ -73,6 +73,14 @@ public class DragLayer extends FrameLayout {
     private int mQsbIndex = -1;
 
     /**
+     * Listener used to propagate events indicating when children are added
+     * and/or removed from a view group.
+     * 
+     * This is a copy of a variable which is hidden by the SDK
+     */
+    protected OnHierarchyChangeListener mOnHierarchyChangeListenerCopy;
+    
+    /**
      * Used to create a new DragLayer from XML.
      *
      * @param context The application's context.
@@ -165,7 +173,9 @@ public class DragLayer extends FrameLayout {
         if (currentFolder == null) {
             return false;
         } else {
-            if (AccessibilityManager.getInstance(mContext).isTouchExplorationEnabled()) {
+        	AccessibilityManager accessibilityManager =
+        	        (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
+            if (accessibilityManager.isTouchExplorationEnabled()) {
                 final int action = ev.getAction();
                 boolean isOverFolder;
                 switch (action) {
@@ -198,13 +208,15 @@ public class DragLayer extends FrameLayout {
     }
 
     private void sendTapOutsideFolderAccessibilityEvent(boolean isEditingName) {
-        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+    	AccessibilityManager accessibilityManager =
+    	        (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
+        if (accessibilityManager.isEnabled()) {
             int stringId = isEditingName ? R.string.folder_tap_to_rename : R.string.folder_tap_to_close;
             AccessibilityEvent event = AccessibilityEvent.obtain(
                     AccessibilityEvent.TYPE_VIEW_FOCUSED);
             onInitializeAccessibilityEvent(event);
-            event.getText().add(mContext.getString(stringId));
-            AccessibilityManager.getInstance(mContext).sendAccessibilityEvent(event);
+            event.getText().add(getContext().getString(stringId));
+            accessibilityManager.sendAccessibilityEvent(event);
         }
     }
 
@@ -611,15 +623,28 @@ public class DragLayer extends FrameLayout {
         mFadeOutAnim.start();
     }
 
-    @Override
+    /**
+     * Register a callback to be invoked when a child is added to or removed
+     * from this view.
+     *
+     * @param listener the callback to invoke on hierarchy change
+     */
+    public void setOnHierarchyChangeListener(OnHierarchyChangeListener listener) {
+        mOnHierarchyChangeListenerCopy = listener;
+        super.setOnHierarchyChangeListener(listener);
+    }
+
     protected void onViewAdded(View child) {
-        super.onViewAdded(child);
+        if (mOnHierarchyChangeListenerCopy != null) {
+            mOnHierarchyChangeListenerCopy.onChildViewAdded(this, child);
+        }
         updateChildIndices();
     }
 
-    @Override
     protected void onViewRemoved(View child) {
-        super.onViewRemoved(child);
+        if (mOnHierarchyChangeListenerCopy != null) {
+            mOnHierarchyChangeListenerCopy.onChildViewRemoved(this, child);
+        }
         updateChildIndices();
     }
 

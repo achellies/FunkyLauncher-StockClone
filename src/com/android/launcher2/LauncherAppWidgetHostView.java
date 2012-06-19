@@ -76,7 +76,7 @@ public class LauncherAppWidgetHostView extends AppWidgetHostView {
         private int mOriginalWindowAttachCount;
 
         public void run() {
-            if ((mParent != null) && hasWindowFocus()
+            if ((getParent() != null) && hasWindowFocus()
                     && mOriginalWindowAttachCount == getWindowAttachCount()
                     && !mHasPerformedLongPress) {
                 if (performLongClick()) {

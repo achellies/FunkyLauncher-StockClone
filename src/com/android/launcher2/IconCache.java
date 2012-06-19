@@ -28,6 +28,8 @@ import android.util.DisplayMetrics;
 
 import java.util.HashMap;
 
+import com.funkyandroid.launcher.R;
+
 /**
  * Cache of application icons.  Icons can be made from any thread.
  */
@@ -71,8 +73,7 @@ public class IconCache {
     }
 
     public Drawable getFullResDefaultActivityIcon() {
-        return getFullResIcon(Resources.getSystem(),
-                com.android.internal.R.mipmap.sym_def_app_icon);
+        return getFullResIcon(mContext.getResources(), R.mipmap.sym_def_app_icon);
     }
 
     public Drawable getFullResIcon(Resources resources, int iconId) {

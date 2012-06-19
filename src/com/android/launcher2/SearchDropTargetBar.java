@@ -30,6 +30,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
 import com.funkyandroid.launcher.R;
+import com.funkyandroid.launcher2.utils.ResourceUtils;
 
 /*
  * Ths bar will manage the transition between the QSB search bar and the delete drop
@@ -233,8 +234,9 @@ public class SearchDropTargetBar extends FrameLayout implements DragController.D
 
     public Rect getSearchBarBounds() {
         if (mQSBSearchBar != null) {
-            final float appScale = mQSBSearchBar.getContext().getResources()
-                    .getCompatibilityInfo().applicationScale;
+            final float appScale = ResourceUtils.
+            						getCompatibilityInfo(mQSBSearchBar.getContext().getResources()).
+            						applicationScale;
             final int[] pos = new int[2];
             mQSBSearchBar.getLocationOnScreen(pos);
 
