@@ -19,7 +19,9 @@
 -->
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.funkyandroid.launcher">
+    package="com.funkyandroid.launcher"
+    android:versionCode="1"
+    android:versionName="0.01">
 
     <!-- This is an API level 15 compatible launcher -->
     <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="15" android:maxSdkVersion="15"/>
