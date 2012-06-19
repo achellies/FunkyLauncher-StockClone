@@ -65,10 +65,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.funkyandroid.launcher.R;
+import com.funkyandroid.launcher2.utils.ViewGroupUtils;
 import com.android.launcher2.FolderIcon.FolderRingAnimator;
 import com.android.launcher2.InstallWidgetReceiver.WidgetMimeTypeHandlerData;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -239,21 +239,8 @@ public class Workspace extends SmoothPagedView
     private float[] mNewRotationYs;
     private float mTransitionProgress;
 
-    /**
-     * Used to access ViewGroup method hidden by the SDK.
-     */
-    private static Method sViewGroupChildLayersEnabled;
-    static {
-    	Class<?>[] methodParams = { Boolean.class };
-    	try {
-    		sViewGroupChildLayersEnabled = ViewGroup.class.getDeclaredMethod("setChildrenLayersEnabled", methodParams );
-    	} catch(NoSuchMethodException e) {
-    		Log.e("Funky Launcher", "Unable to find childLayersEnabled set method", e);
-    		sViewGroupChildLayersEnabled = null;
-    	}
-    }
-    private static final Object[] sChildEnablerEnabledParams = { Boolean.TRUE };
-    private static final Object[] sChildEnablerDisbledParams = { Boolean.FALSE };
+    private static final Object[] sChildEnablerEnabledParams = { true };
+    private static final Object[] sChildEnablerDisbledParams = { false };
 
     /**
      * Used to access ClipData method hidden by the SDK
@@ -1338,11 +1325,7 @@ public class Workspace extends SmoothPagedView
                     ViewGroup page = (ViewGroup) getPageAt(i);
                     if (page.getVisibility() == VISIBLE &&
                         page.getAlpha() > LauncherApplication.getAlphaThreshold()) {
-                    	try {
-							sViewGroupChildLayersEnabled.invoke(getPageAt(i), sChildEnablerEnabledParams);
-						} catch (Exception e) {
-							Log.e("Funky Launcher", "Problem setting layers enabled for children", e);
-						}
+                    	ViewGroupUtils.setChildLayersEnabled(((ViewGroup)getPageAt(i)), true);
                     }
                 }
             }
@@ -1460,11 +1443,7 @@ public class Workspace extends SmoothPagedView
             // the enabling to dispatchDraw
             if (!enableChildrenLayers) {
                 for (int i = 0; i < getPageCount(); i++) {
-                	try {
-						sViewGroupChildLayersEnabled.invoke(getPageAt(i), sChildEnablerDisbledParams);
-					} catch (Exception e) {
-						Log.e("Funky Launcher", "Problem setting layers disabled for children", e);
-					}
+                	ViewGroupUtils.setChildLayersEnabled(((ViewGroup)getPageAt(i)), false);
                 }
             }
         }

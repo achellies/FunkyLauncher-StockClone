@@ -32,7 +32,7 @@ public final class SearchManagerUtils {
 	private static Method sStartSearchMethod;
 	static {
 		try {
-			Class<?>[] methodParams = {String.class, Boolean.class, ComponentName.class, Bundle.class, Boolean.class, Rect.class };
+			Class<?>[] methodParams = {String.class, boolean.class, ComponentName.class, Bundle.class, boolean.class, Rect.class };
 			sStartSearchMethod = SearchManager.class.getDeclaredMethod("startSearch", methodParams);
 		} catch(NoSuchMethodException e) {
 			Log.e(Launcher.TAG, "Unable to get getGlobalSearchActivity from SearchManager", e);			

@@ -17,7 +17,7 @@ public final class ResourceUtils {
 	private static Method sGetCompatibilityInfo;
 	static {
 		try {
-			Resources.class.getDeclaredMethod("getCompatibilityInfo", (Class<?>[]) null);
+			sGetCompatibilityInfo = Resources.class.getDeclaredMethod("getCompatibilityInfo", (Class<?>[]) null);
 		} catch (NoSuchMethodException e) {
 			Log.e(Launcher.TAG, "Problem getting compatibility info method", e);
 		}
