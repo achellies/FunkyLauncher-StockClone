@@ -91,7 +91,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.common.Search;
 import com.funkyandroid.launcher.R;
 import com.funkyandroid.launcher2.utils.SearchManagerUtils;
 import com.android.launcher2.DropTarget.DragObject;
@@ -114,10 +113,16 @@ public final class Launcher extends Activity
                    AllAppsView.Watcher, View.OnTouchListener {
     public static final String TAG = "Funky Launcher";
     static final boolean LOGD = false;
-
+    
     static final boolean PROFILE_STARTUP = false;
     static final boolean DEBUG_WIDGETS = false;
 
+    /**
+     * The search source key
+     */
+    
+    public final static String SEARCH_SOURCE = "source";
+    
     private static final int MENU_GROUP_WALLPAPER = 1;
     private static final int MENU_WALLPAPER_SETTINGS = Menu.FIRST + 1;
     private static final int MENU_MANAGE_APPS = MENU_WALLPAPER_SETTINGS + 1;
@@ -1324,7 +1329,7 @@ public final class Launcher extends Activity
         }
         if (appSearchData == null) {
             appSearchData = new Bundle();
-            appSearchData.putString(Search.SOURCE, "launcher-search");
+            appSearchData.putString(SEARCH_SOURCE, "launcher-search");
         }
         Rect sourceBounds = mSearchDropTargetBar.getSearchBarBounds();
 
