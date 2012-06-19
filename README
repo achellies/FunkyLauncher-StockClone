@@ -1,10 +1,8 @@
 * Funky Launcher *
 
-This is a demonstration project to show how simply the Android stock launcher can be modified. This example changes the 
-desktop background based on whether or not WiFi is on.
+This is a demonstration project to show how simply the Android stock launcher can be modified. This example changes the desktop background based on whether or not WiFi is on.
 
-In order to compile this you also need to include the Launcher Support project (https://github.com/FunkyAndroid/FunkyLauncherSupport) 
-which provides classes which are not part of the SDK, but are available on Android 4.0.3 and 4.0.4.
+In order to compile this you also need to include the Launcher Support project (https://github.com/FunkyAndroid/FunkyLauncherSupport) which provides classes which are not part of the SDK, but are available on Android 4.0.3 and 4.0.4.
 
 --
 
