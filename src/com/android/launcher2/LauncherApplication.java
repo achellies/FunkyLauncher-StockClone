@@ -18,18 +18,22 @@ package com.android.launcher2;
 
 import android.app.Application;
 import android.app.SearchManager;
+import android.app.WallpaperManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.util.Log;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 
+import com.funkyandroid.launcher2.rulesengine.RulesEnginePreferences;
 import com.funkyandroid.launcher2.rulesengine.WifiChangeHandlerService;
 
 public class LauncherApplication extends Application {
@@ -89,13 +93,12 @@ public class LauncherApplication extends Application {
         ContentResolver resolver = getContentResolver();
         resolver.registerContentObserver(LauncherSettings.Favorites.CONTENT_URI, true,
                 mFavoritesObserver);
-        
+
         WifiManager wifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
         WifiChangeHandlerService.changeWallpaper(
         		this, 
         		wifiManager.isWifiEnabled() 
         		&& wifiManager.getConnectionInfo() != null);
-        
     }
 
     /**

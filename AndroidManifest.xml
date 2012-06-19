@@ -26,8 +26,6 @@
     <!-- This is an API level 15 compatible launcher -->
     <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="15" android:maxSdkVersion="15"/>
     
-    <original-package android:name="com.android.launcher2" />
-
     <permission
         android:name="com.funkyandroid.launcher.permission.INSTALL_SHORTCUT"
         android:permissionGroup="android.funkyandroid.permission-group.SYSTEM_TOOLS"

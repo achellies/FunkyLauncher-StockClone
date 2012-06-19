@@ -28,7 +28,7 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.SearchManager;
-import android.app.StatusBarManager;
+import android.app.WallpaperManager;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
@@ -92,6 +92,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.funkyandroid.launcher.R;
+import com.funkyandroid.launcher2.rulesengine.RulesEnginePreferences;
+import com.funkyandroid.launcher2.rulesengine.WifiChangeHandlerService;
 import com.funkyandroid.launcher2.utils.SearchManagerUtils;
 import com.android.launcher2.DropTarget.DragObject;
 
@@ -262,6 +264,17 @@ public final class Launcher extends Activity
                 mWorkspace.buildPageHardwareLayers();
             }
         }
+    };
+    
+    /**
+     * The intent listener for rules based wallpaper changes
+     */
+    
+    private final BroadcastReceiver sWallpaperChangeReceiver = new BroadcastReceiver() {
+    	@Override
+    	public void onReceive(Context context, Intent intent) {
+    		changeWallpaper(intent.getIntExtra(RulesEnginePreferences.WALLPAPER_PREFERNCE, -1));
+    	}
     };
 
     private static ArrayList<PendingAddArguments> sPendingAddList
@@ -557,6 +570,13 @@ public final class Launcher extends Activity
     @Override
     protected void onResume() {
         super.onResume();
+
+        SharedPreferences ruleBasedPreferences = getSharedPreferences(RulesEnginePreferences.PREFERENCE_STORE_NAME, Context.MODE_PRIVATE);
+		int wallpaper = ruleBasedPreferences.getInt(RulesEnginePreferences.WALLPAPER_PREFERNCE, -1);
+		changeWallpaper(wallpaper);
+
+		registerReceiver(sWallpaperChangeReceiver, new IntentFilter(WifiChangeHandlerService.BROADCAST_WALLPAPER_CHANGED));
+
         mPaused = false;
         if (mRestoring || mOnResumeNeedsLoad) {
             mWorkspaceLoading = true;
@@ -604,6 +624,7 @@ public final class Launcher extends Activity
         super.onPause();
         mPaused = true;
         mDragController.cancelDrag();
+        unregisterReceiver(sWallpaperChangeReceiver);
     }
 
     @Override
@@ -636,6 +657,18 @@ public final class Launcher extends Activity
         }
     }
     */
+    /**
+     * Change the wallpaper
+     */
+    
+    private void changeWallpaper(final int wallpaper) {
+		WallpaperManager wpm = (WallpaperManager)getSystemService(Context.WALLPAPER_SERVICE);
+		try {
+			wpm.setResource(wallpaper);
+		} catch(IOException ioe) {
+			Log.e(Launcher.TAG, "Unable to change wallpaper", ioe);
+		}		    	
+    }
 
     private boolean acceptFilter() {
         final InputMethodManager inputManager = (InputMethodManager)

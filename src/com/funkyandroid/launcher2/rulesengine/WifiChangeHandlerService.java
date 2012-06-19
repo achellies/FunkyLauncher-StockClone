@@ -1,22 +1,26 @@
 package com.funkyandroid.launcher2.rulesengine;
 
-import java.io.IOException;
 
-import com.android.launcher2.Launcher;
 import com.funkyandroid.launcher.R;
 
 import android.app.IntentService;
-import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
-import android.util.Log;
 
-public class WifiChangeHandlerService extends IntentService {
+public class WifiChangeHandlerService extends IntentService {	
+	/**
+	 * The broadcast intent indicating a change in the wallpaper
+	 */
 	
+	public static final String BROADCAST_WALLPAPER_CHANGED = "com.funkyandroid.launcher2.rulesengine.WALLPAPER_CHANGED";
+	
+	/**
+	 * The wallpapers to use.
+	 */
 	private static final int	onId = R.drawable.wallpaper_bubblegum,
 								offId = R.drawable.wallpaper_escape;
-	
 	
 	public WifiChangeHandlerService() {
 		this("Funky Launcher Wifi Change Handler Service");
@@ -38,16 +42,21 @@ public class WifiChangeHandlerService extends IntentService {
 	 * @param connected Whether or not we're connected
 	 */
 	public static void changeWallpaper(final Context context, final boolean connected) {
-		WallpaperManager wpm = (WallpaperManager)context.getSystemService(Context.WALLPAPER_SERVICE);
-		try {
-			if(connected) {
-				wpm.setResource(onId);
-			} else {
-				wpm.setResource(offId);
-			}
-		} catch(IOException ioe) {
-			Log.e(Launcher.TAG, "Unable to change wallpaper", ioe);
-		}		
+        int wallpaper;
+        if(connected) {
+			wallpaper = onId;
+		} else {
+			wallpaper = offId;
+		}
+        SharedPreferences ruleBasedPreferences = 
+        		context.getSharedPreferences(RulesEnginePreferences.PREFERENCE_STORE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor prefsEditor = ruleBasedPreferences.edit();
+		prefsEditor.putInt(RulesEnginePreferences.WALLPAPER_PREFERNCE, wallpaper);
+		prefsEditor.apply();
+		
+		Intent broadcast = new Intent(BROADCAST_WALLPAPER_CHANGED);
+		broadcast.putExtra(RulesEnginePreferences.WALLPAPER_PREFERNCE, wallpaper);
+		context.sendBroadcast(broadcast);
 	}
-
+	
 }
